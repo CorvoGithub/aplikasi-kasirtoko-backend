@@ -41,13 +41,28 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        // 1. Define Custom Indonesian Messages
+        $messages = [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'store_name.required' => 'Nama toko wajib diisi.',
+            'store_name.unique' => 'Nama toko ini sudah terdaftar, gunakan nama lain.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email ini sudah terdaftar.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal harus 6 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ];
+
+        // 2. Pass the messages as the second argument
         $request->validate([
             'name' => 'required|string|max:255',
             'store_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+            'password' => 'required|string|min:6|confirmed',
+        ], $messages);
 
+        // ... The rest of your code remains the same ...
         $user = User::create([
             'name' => $request->name,
             'store_name' => $request->store_name,
@@ -66,6 +81,8 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'store_name' => $user->store_name,
+                'address' => $user->address,
+                'phone' => $user->phone,     
             ]
         ], 201);
     }

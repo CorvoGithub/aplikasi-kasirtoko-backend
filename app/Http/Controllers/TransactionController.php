@@ -8,24 +8,61 @@ use App\Models\TransaksiDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class TransactionController extends Controller
 {
-
-    // GET: List History
-    public function index()
+    /**
+     * GET: List History with Specific Minute Filtering
+     */
+    public function index(Request $request)
     {
-        // 1. Get transactions for current user
-        // 2. 'with' loads the relationships (Eager Loading) to avoid N+1 query issues
-        $transactions = Transaksi::where('user_id', Auth::id())
-            ->with(['transaksiDetails.produk']) // Load details AND the product info inside details
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Transaksi::where('user_id', Auth::id())
+            ->with(['transaksiDetails.produk']);
+
+        if ($request->filled('date')) {
+            $date = $request->date; // YYYY-MM-DD
+
+            // 1. Determine Start Time (WIB)
+            // Example: 19 becomes "19:00:00"
+            $startHour = $request->filled('start_hour') ? $request->start_hour : '00';
+            $startTimeString = "$date $startHour:00:00";
+
+            // 2. Determine End Time (WIB)
+            // Example: 20 becomes "20:00:59"
+            // This captures the whole "20:00" minute, but stops before "20:01"
+            if ($request->filled('end_hour')) {
+                $endHour = $request->end_hour;
+                $endTimeString = "$date $endHour:00:59"; 
+            } else {
+                // If no end hour selected, cover the whole day
+                $endTimeString = "$date 23:59:59";
+            }
+
+            try {
+                // 3. Convert WIB to UTC for Database Query
+                $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $startTimeString, 'Asia/Jakarta')
+                                  ->setTimezone('UTC');
+
+                $endUtc   = Carbon::createFromFormat('Y-m-d H:i:s', $endTimeString, 'Asia/Jakarta')
+                                  ->setTimezone('UTC');
+
+                // 4. Apply Filter
+                $query->whereBetween('created_at', [$startUtc, $endUtc]);
+
+            } catch (\Exception $e) {
+                // Ignore invalid date/time parsing
+            }
+        }
+
+        $transactions = $query->orderBy('created_at', 'desc')->get();
 
         return response()->json($transactions);
     }
 
+    /**
+     * POST: Create New Transaction
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -42,7 +79,6 @@ class TransactionController extends Controller
             $totalHarga = 0;
             $itemsToInsert = [];
 
-            // Calculate Logic...
             foreach ($request->items as $item) {
                 $product = Produk::where('user_id', $user->id)->lockForUpdate()->find($item['id']);
 
@@ -62,17 +98,14 @@ class TransactionController extends Controller
 
             if ($request->uang_diberikan < $totalHarga) throw new \Exception("Uang kurang.");
 
-            // Create Transaction
             $transaksi = Transaksi::create([
                 'user_id' => $user->id,
-                // CHANGE: Use your model's static method
                 'kode_transaksi' => Transaksi::generateKodeTransaksi(), 
                 'total_harga' => $totalHarga,
                 'uang_diberikan' => $request->uang_diberikan,
                 'kembalian' => $request->uang_diberikan - $totalHarga,
             ]);
 
-            // Create Details
             foreach ($itemsToInsert as $item) {
                 TransaksiDetail::create([
                     'transaksi_id' => $transaksi->id,
