@@ -16,31 +16,33 @@ class ProfileController extends Controller
 
         $request->validate([
             'name'       => 'required|string|max:255',
-            'store_name' => [
-                'required', 'string', 'max:255',
-                Rule::unique('users')->ignore($user->id), // Unique, but ignore current user
-            ],
-            'phone'      => [
-                'nullable', 'string', 'max:15',
-                Rule::unique('users')->ignore($user->id), // Unique, but ignore current user
-            ],
+            'store_name' => 'required|string|max:255|unique:users,store_name,'.$user->id,
+            'phone'      => 'nullable|string|max:15',
             'address'    => 'nullable|string',
-        ], [
-            'store_name.unique' => 'Nama toko sudah digunakan oleh pengguna lain.',
-            'phone.unique'      => 'Nomor telepon sudah terdaftar.',
+            'avatar'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Validation for image
         ]);
 
-        $user->update([
-            'name'       => $request->name,
-            'store_name' => $request->store_name,
-            'phone'      => $request->phone,
-            'address'    => $request->address,
-        ]);
+        // Handle Image Upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists (optional, but good practice)
+            // if ($user->avatar && Storage::exists('public/' . $user->avatar)) {
+            //    Storage::delete('public/' . $user->avatar);
+            // }
+
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $path;
+        }
+
+        $user->name = $request->name;
+        $user->store_name = $request->store_name;
+        $user->phone = $request->phone;
+        $user->address = $request->address;
+        $user->save();
 
         return response()->json([
             'success' => true,
             'message' => 'Profil berhasil diperbarui.',
-            'user'    => $user
+            'user'    => $user // Returns updated user with avatar path
         ]);
     }
 
