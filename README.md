@@ -67,8 +67,8 @@ Ikuti langkah ini untuk menjalankan server API:
     * Sesuaikan konfigurasi database di file `.env`:
         ```env
         DB_DATABASE=kasirtoko
-        DB_USERNAME=**your_username**
-        DB_PASSWORD=**your_password**
+        DB_USERNAME=[your_username]
+        DB_PASSWORD=[your_password]
         ```
 
 3.  **Migrasi & Storage:**
