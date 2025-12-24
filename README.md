@@ -86,7 +86,7 @@ Ikuti langkah ini untuk menjalankan server API:
 
 ---
 
-## 📹 Video Demonstrasi
+## Video Demonstrasi
 
 Berikut adalah link video penjelasan kode, struktur database, dan demonstrasi penggunaan aplikasi:
 
