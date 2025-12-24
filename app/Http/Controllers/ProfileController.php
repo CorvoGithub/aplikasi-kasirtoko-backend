@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
-    // Update Profile Info (Name, Store, Address, Phone)
+    // Update Profile
     public function updateProfile(Request $request)
     {
+        /** @var \App\Models\User $user */ 
         $user = Auth::user();
 
         $request->validate([
@@ -19,16 +21,16 @@ class ProfileController extends Controller
             'store_name' => 'required|string|max:255|unique:users,store_name,'.$user->id,
             'phone'      => 'nullable|string|max:15',
             'address'    => 'nullable|string',
-            'avatar'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Validation for image
+            'avatar'     => 'nullable|image|mimes:jpeg,png,jpg|max:16384',
         ]);
 
-        // Handle Image Upload
         if ($request->hasFile('avatar')) {
-            // Delete old avatar if exists (optional, but good practice)
-            // if ($user->avatar && Storage::exists('public/' . $user->avatar)) {
-            //    Storage::delete('public/' . $user->avatar);
-            // }
+            // Hapus avatar lama jika ada
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
 
+            // Insert avatar
             $path = $request->file('avatar')->store('avatars', 'public');
             $user->avatar = $path;
         }
@@ -42,7 +44,7 @@ class ProfileController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Profil berhasil diperbarui.',
-            'user'    => $user // Returns updated user with avatar path
+            'user'    => $user
         ]);
     }
 
@@ -58,6 +60,7 @@ class ProfileController extends Controller
             'password.confirmed'        => 'Konfirmasi password tidak cocok.',
         ]);
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         if (!Hash::check($request->current_password, $user->password)) {

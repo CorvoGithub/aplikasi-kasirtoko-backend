@@ -9,6 +9,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    // Login 
     public function login(Request $request)
     {
         $request->validate([
@@ -42,9 +43,9 @@ class AuthController extends Controller
         ]);
     }
 
+    // Register
     public function register(Request $request)
     {
-        // 1. Define Custom Indonesian Messages
         $messages = [
             'name.required' => 'Nama lengkap wajib diisi.',
             'store_name.required' => 'Nama toko wajib diisi.',
@@ -57,7 +58,6 @@ class AuthController extends Controller
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ];
 
-        // 2. Pass the messages as the second argument
         $request->validate([
             'name' => 'required|string|max:255',
             'store_name' => 'required|string|max:255',
@@ -65,7 +65,6 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ], $messages);
 
-        // ... The rest of your code remains the same ...
         $user = User::create([
             'name' => $request->name,
             'store_name' => $request->store_name,
@@ -90,6 +89,7 @@ class AuthController extends Controller
         ], 201);
     }
 
+    // Logout
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();

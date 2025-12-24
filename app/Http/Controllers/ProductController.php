@@ -9,10 +9,9 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
-    // READ (List Items)
+    // Read
     public function index()
     {
-        // Only fetch products belonging to the logged-in user
         $products = Produk::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get();
@@ -20,7 +19,7 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    // CREATE (Add Item)
+    // Create
     public function store(Request $request)
     {
         $request->validate([
@@ -28,17 +27,16 @@ class ProductController extends Controller
             'harga_modal' => 'required|numeric',
             'harga_jual' => 'required|numeric',
             'stok' => 'required|integer',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Max 2MB
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $path = null;
         if ($request->hasFile('foto')) {
-            // Save to storage/app/public/products
             $path = $request->file('foto')->store('products', 'public');
         }
 
         $product = Produk::create([
-            'user_id' => Auth::id(), // Auto-assign current user
+            'user_id' => Auth::id(),
             'nama_produk' => $request->nama_produk,
             'harga_modal' => $request->harga_modal,
             'harga_jual' => $request->harga_jual,
@@ -50,7 +48,7 @@ class ProductController extends Controller
         return response()->json(['message' => 'Produk berhasil ditambahkan', 'data' => $product], 201);
     }
 
-    // UPDATE (Edit Item)
+    // Update
     public function update(Request $request, $id)
     {
         $product = Produk::where('user_id', Auth::id())->findOrFail($id);
@@ -63,10 +61,12 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('foto')) {
-            // Delete old photo if exists
-            if ($product->foto) {
+            // Hapus foto lama
+            if ($product->foto && Storage::disk('public')->exists($product->foto)) {
                 Storage::disk('public')->delete($product->foto);
             }
+            
+            // Insert foto
             $product->foto = $request->file('foto')->store('products', 'public');
         }
 
@@ -81,12 +81,13 @@ class ProductController extends Controller
         return response()->json(['message' => 'Produk diupdate', 'data' => $product]);
     }
 
-    // DELETE
+    // Delete
     public function destroy($id)
     {
         $product = Produk::where('user_id', Auth::id())->findOrFail($id);
         
-        if ($product->foto) {
+        // Hapus foto dari storage
+        if ($product->foto && Storage::disk('public')->exists($product->foto)) {
             Storage::disk('public')->delete($product->foto);
         }
 

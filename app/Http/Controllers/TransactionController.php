@@ -12,46 +12,38 @@ use Carbon\Carbon;
 
 class TransactionController extends Controller
 {
-    /**
-     * GET: List History with Specific Minute Filtering
-     */
+    // Read & filter
     public function index(Request $request)
     {
         $query = Transaksi::where('user_id', Auth::id())
             ->with(['transaksiDetails.produk']);
 
         if ($request->filled('date')) {
-            $date = $request->date; // YYYY-MM-DD
+            $date = $request->date;
 
-            // 1. Determine Start Time (WIB)
-            // Example: 19 becomes "19:00:00"
+            // Start time
             $startHour = $request->filled('start_hour') ? $request->start_hour : '00';
             $startTimeString = "$date $startHour:00:00";
 
-            // 2. Determine End Time (WIB)
-            // Example: 20 becomes "20:00:59"
-            // This captures the whole "20:00" minute, but stops before "20:01"
+            // End time
             if ($request->filled('end_hour')) {
                 $endHour = $request->end_hour;
                 $endTimeString = "$date $endHour:00:59"; 
             } else {
-                // If no end hour selected, cover the whole day
                 $endTimeString = "$date 23:59:59";
             }
 
             try {
-                // 3. Convert WIB to UTC for Database Query
+    
                 $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $startTimeString, 'Asia/Jakarta')
                                   ->setTimezone('UTC');
 
                 $endUtc   = Carbon::createFromFormat('Y-m-d H:i:s', $endTimeString, 'Asia/Jakarta')
                                   ->setTimezone('UTC');
 
-                // 4. Apply Filter
                 $query->whereBetween('created_at', [$startUtc, $endUtc]);
 
             } catch (\Exception $e) {
-                // Ignore invalid date/time parsing
             }
         }
 
@@ -60,9 +52,7 @@ class TransactionController extends Controller
         return response()->json($transactions);
     }
 
-    /**
-     * POST: Create New Transaction
-     */
+    // Create Transaction
     public function store(Request $request)
     {
         $request->validate([
