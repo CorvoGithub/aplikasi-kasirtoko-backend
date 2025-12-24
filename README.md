@@ -1,15 +1,15 @@
-# 🛒 Mantra - Backend API (Sistem Kasir Toko)
+# Mantra - Backend API (Sistem Kasir Toko)
 
-Repository ini berisi **Backend / Server-side** untuk aplikasi **Mantra**, sebuah sistem Point of Sale (POS) yang dibangun menggunakan **Laravel 11**.
+Repository ini berisi **Backend / Server-side** untuk aplikasi **Mantra**, sebuah sistem Point of Sale (POS) yang dibangun menggunakan **Laravel 12**.
 
 Backend ini menyediakan REST API untuk menangani autentikasi pengguna, manajemen inventaris, transaksi penjualan, dan pelaporan data.
 
 > **Catatan:** Frontend (React) untuk aplikasi ini terdapat di repository terpisah:
-> **[MASUKKAN LINK REPOSITORY FRONTEND ANDA DISINI]**
+> **https://github.com/CorvoGithub/aplikasi-kasirtoko-frontend**
 
 ---
 
-## 📋 Fitur Backend
+## Fitur Backend
 
 Backend ini menangani logika bisnis sesuai spesifikasi **Soal Tes Tipe 2**:
 
@@ -27,18 +27,18 @@ Backend ini menangani logika bisnis sesuai spesifikasi **Soal Tes Tipe 2**:
 
 ---
 
-## 🛠️ Teknologi
+## Teknologi
 
-* **Framework:** Laravel 10/11
-* **Database:** MySQL
+* **Framework:** Laravel 12
+* **Database:** PostgreSQL
 * **Auth:** Laravel Sanctum
 * **Storage:** Local Storage (Public Link)
 
 ---
 
-## 💾 Struktur Database
+## Struktur Database
 
-File database lengkap (`mantra_pos.sql`) telah disertakan di root repository ini.
+File database lengkap (`kasirtoko_structure.sql`) telah disertakan di root repository ini.
 
 * **`users`**: Data pemilik toko.
 * **`products`**: Inventaris barang (terikat ke `user_id`).
@@ -47,14 +47,14 @@ File database lengkap (`mantra_pos.sql`) telah disertakan di root repository ini
 
 ---
 
-## 🚀 Cara Menjalankan (Localhost)
+## Cara Menjalankan (Localhost)
 
 Ikuti langkah ini untuk menjalankan server API:
 
 1.  **Clone Repository & Install Dependencies:**
     ```bash
-    git clone [LINK_REPO_INI]
-    cd [NAMA_FOLDER]
+    git clone https://github.com/CorvoGithub/aplikasi-kasirtoko-backend
+    cd kasirtoko-backend
     composer install
     ```
 
@@ -66,9 +66,9 @@ Ikuti langkah ini untuk menjalankan server API:
         ```
     * Sesuaikan konfigurasi database di file `.env`:
         ```env
-        DB_DATABASE=mantra_pos
-        DB_USERNAME=root
-        DB_PASSWORD=
+        DB_DATABASE=kasirtoko
+        DB_USERNAME= (sesuaikan)
+        DB_PASSWORD= (sesuaikan)
         ```
 
 3.  **Migrasi & Storage:**
@@ -90,8 +90,8 @@ Ikuti langkah ini untuk menjalankan server API:
 
 Berikut adalah link video penjelasan kode, struktur database, dan demonstrasi penggunaan aplikasi:
 
-**[PASTE LINK YOUTUBE / GOOGLE DRIVE ANDA DISINI]**
+**https://drive.google.com/drive/folders/1rEJgcqvZjZ-vCUCDXXSrLgVeihcP7nqi?usp=drive_link**
 
 ---
 
-**Dibuat oleh:** [Nama Anda]
+**Dibuat oleh:** Andhika Farizky Mansyur
